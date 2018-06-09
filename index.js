@@ -8,12 +8,8 @@ const flac = require('node-flac');
 const Discord = require('discord.js');
 const client = new Discord.Client();
 
-// make a new stream for each time someone starts to talk
-function generateOutputFile(channel, member) {
-  // use IDs instead of username cause some people have stupid emojis in their name
-  const fileName = `./record-flac/${channel.id}-${member.id}-${Date.now()}.flac`;
-  return fs.createWriteStream(fileName);
-}
+const speech = require('@google-cloud/speech');
+const sclient = new speech.SpeechClient();
 
 class MonoStream extends stream.Transform {
   _transform(chunk, encoding, callback) {
@@ -41,11 +37,9 @@ client.on('message', msg => {
 
         conn.on('speaking', (user, speaking) => {
           if (speaking) {
-            msg.channel.send(`I'm listening to ${user}`);
+            // msg.channel.send(`I'm listening to ${user}`);
             // this creates a 16-bit signed PCM, stereo 48KHz PCM stream.
             const audioStream = receiver.createPCMStream(user);
-            // create an output stream so we can dump our data in a file
-            const outputStream = generateOutputFile(voiceChannel, user);
 
             const encoderStream = new flac.FlacEncoder({
               channels: 1,
@@ -55,14 +49,26 @@ client.on('message', msg => {
 
             const monoStream = new MonoStream()
 
+            const recognizeStream = sclient
+              .streamingRecognize({config: {encoding: 'FLAC', sampleRateHertz: 48000, languageCode: 'ja-JP'}})
+              .on('error', console.error)
+              .on('data', response => {
+                  if(response.results.length) {
+                    const transcription = response.results
+                      .map(result => result.alternatives[0].transcript)
+                      .join('\n');
+                    msg.channel.send(`${user}: ${transcription}`);
+                  }
+              });
+
             // pipe our audio data into the file stream
             audioStream.pipe(monoStream);
             monoStream.pipe(encoderStream);
-            encoderStream.pipe(outputStream);
+            encoderStream.pipe(recognizeStream);
             // when the stream ends (the user stopped talking) tell the user
-            audioStream.on('end', () => {
-              msg.channel.send(`I'm no longer listening to ${user}`);
-            });
+            // audioStream.on('end', () => {
+            //   msg.channel.send(`I'm no longer listening to ${user}`);
+            // });
           }
         });
       })

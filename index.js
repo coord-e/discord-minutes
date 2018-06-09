@@ -41,7 +41,7 @@ client.on('message', msg => {
         const logger = new (winston.Logger)({
             transports: [
                 new (winston.transports.Console)(),
-                new (winston.transports.File)({ filename })
+                new (winston.transports.File)({ filename, json: false })
               ]
             });
 

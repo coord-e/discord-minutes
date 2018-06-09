@@ -15,5 +15,12 @@
   "bugs": {
     "url": "https://github.com/coord-e/discord-minutes/issues"
   },
-  "homepage": "https://github.com/coord-e/discord-minutes#readme"
+  "homepage": "https://github.com/coord-e/discord-minutes#readme",
+  "dependencies": {
+    "discord.js": "^11.3.2",
+    "erlpack": "github:discordapp/erlpack",
+    "node-opus": "^0.3.0",
+    "sodium": "^2.0.3",
+    "uws": "^10.148.0"
+  }
 }

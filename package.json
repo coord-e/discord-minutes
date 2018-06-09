@@ -19,6 +19,7 @@
   "dependencies": {
     "discord.js": "^11.3.2",
     "erlpack": "github:discordapp/erlpack",
+    "node-flac": "0.0.6",
     "node-opus": "^0.3.0",
     "sodium": "^2.0.3",
     "uws": "^10.148.0"

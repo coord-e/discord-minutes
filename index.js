@@ -2,13 +2,15 @@ const fs = require('fs');
 
 const config = JSON.parse(fs.readFileSync('./config.json', 'utf8'));
 
+const flac = require('node-flac');
+
 const Discord = require('discord.js');
 const client = new Discord.Client();
 
 // make a new stream for each time someone starts to talk
 function generateOutputFile(channel, member) {
   // use IDs instead of username cause some people have stupid emojis in their name
-  const fileName = `./recordings/${channel.id}-${member.id}-${Date.now()}.pcm`;
+  const fileName = `./record-flac/${channel.id}-${member.id}-${Date.now()}.flac`;
   return fs.createWriteStream(fileName);
 }
 
@@ -36,8 +38,16 @@ client.on('message', msg => {
             const audioStream = receiver.createPCMStream(user);
             // create an output stream so we can dump our data in a file
             const outputStream = generateOutputFile(voiceChannel, user);
+
+            const encoder = new flac.FlacEncoder({
+              channels: 2,
+              bitDepth: 16,
+              sampleRate: 48000
+            });
+
             // pipe our audio data into the file stream
-            audioStream.pipe(outputStream);
+            audioStream.pipe(encoder);
+            encoder.pipe(outputStream);
             outputStream.on("data", console.log);
             // when the stream ends (the user stopped talking) tell the user
             audioStream.on('end', () => {

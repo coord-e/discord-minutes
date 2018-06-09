@@ -1,4 +1,5 @@
 const fs = require('fs');
+const stream = require('stream');
 
 const config = JSON.parse(fs.readFileSync('./config.json', 'utf8'));
 
@@ -12,6 +13,13 @@ function generateOutputFile(channel, member) {
   // use IDs instead of username cause some people have stupid emojis in their name
   const fileName = `./record-flac/${channel.id}-${member.id}-${Date.now()}.flac`;
   return fs.createWriteStream(fileName);
+}
+
+class MonoStream extends stream.Transform {
+  _transform(chunk, encoding, callback) {
+    this.push(chunk.filter((c, i) => i % 2))
+		callback()
+	}
 }
 
 client.on('message', msg => {
@@ -39,16 +47,18 @@ client.on('message', msg => {
             // create an output stream so we can dump our data in a file
             const outputStream = generateOutputFile(voiceChannel, user);
 
-            const encoder = new flac.FlacEncoder({
-              channels: 2,
+            const encoderStream = new flac.FlacEncoder({
+              channels: 1,
               bitDepth: 16,
               sampleRate: 48000
             });
 
+            const monoStream = new MonoStream()
+
             // pipe our audio data into the file stream
-            audioStream.pipe(encoder);
-            encoder.pipe(outputStream);
-            outputStream.on("data", console.log);
+            audioStream.pipe(monoStream);
+            monoStream.pipe(encoderStream);
+            encoderStream.pipe(outputStream);
             // when the stream ends (the user stopped talking) tell the user
             audioStream.on('end', () => {
               msg.channel.send(`I'm no longer listening to ${user}`);

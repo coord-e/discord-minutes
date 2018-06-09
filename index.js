@@ -3,6 +3,8 @@ const stream = require('stream');
 
 const config = JSON.parse(fs.readFileSync('./config.json', 'utf8'));
 
+const winston = require('winston');
+
 const flac = require('node-flac');
 
 const Discord = require('discord.js');
@@ -35,6 +37,14 @@ client.on('message', msg => {
         // create our voice receiver
         const receiver = conn.createReceiver();
 
+        const filename = `${conn.channel.name}-${Date.now()}.log`;
+        const logger = new (winston.Logger)({
+            transports: [
+                new (winston.transports.Console)(),
+                new (winston.transports.File)({ filename, json: false })
+              ]
+            });
+
         conn.on('speaking', (user, speaking) => {
           if (speaking) {
             // msg.channel.send(`I'm listening to ${user}`);
@@ -51,13 +61,14 @@ client.on('message', msg => {
 
             const recognizeStream = sclient
               .streamingRecognize({config: {encoding: 'FLAC', sampleRateHertz: 48000, languageCode: 'ja-JP'}})
-              .on('error', console.error)
+              .on('error', logger.error)
               .on('data', response => {
                   if(response.results.length) {
                     const transcription = response.results
                       .map(result => result.alternatives[0].transcript)
                       .join('\n');
                     msg.channel.send(`${user}: ${transcription}`);
+                    logger.info(`${user.username}: ${transcription}`);
                   }
               });
 

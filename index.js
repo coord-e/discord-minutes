@@ -61,7 +61,7 @@ client.on('message', msg => {
 
             const recognizeStream = sclient
               .streamingRecognize({config: {encoding: 'FLAC', sampleRateHertz: 48000, languageCode: 'ja-JP'}})
-              .on('error', console.error)
+              .on('error', logger.error)
               .on('data', response => {
                   if(response.results.length) {
                     const transcription = response.results

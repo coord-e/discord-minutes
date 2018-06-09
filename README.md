@@ -9,7 +9,8 @@ Create a minute of meeting in Discord using Voice Recoginition.
 ```json
 {
   "token": "<Token generated for your bot>",
-  "prefix": "!"
+  "prefix": "!",
+  "languageCode": "ja-JP"
 }
 ```
 

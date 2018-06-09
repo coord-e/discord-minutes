@@ -1,0 +1,29 @@
+{
+  "name": "discord-minutes",
+  "version": "1.0.0",
+  "description": "Create minutes automatically using Voice Recognition",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/coord-e/discord-minutes.git"
+  },
+  "author": "coord.e",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/coord-e/discord-minutes/issues"
+  },
+  "homepage": "https://github.com/coord-e/discord-minutes#readme",
+  "dependencies": {
+    "@google-cloud/speech": "^1.5.0",
+    "discord.js": "^11.3.2",
+    "erlpack": "github:discordapp/erlpack",
+    "node-flac": "0.0.6",
+    "node-opus": "^0.3.0",
+    "sodium": "^2.0.3",
+    "uws": "^10.148.0",
+    "winston": "^2.4.2"
+  }
+}

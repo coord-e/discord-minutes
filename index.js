@@ -60,7 +60,7 @@ client.on('message', msg => {
             const monoStream = new MonoStream()
 
             const recognizeStream = sclient
-              .streamingRecognize({config: {encoding: 'FLAC', sampleRateHertz: 48000, languageCode: 'ja-JP'}})
+              .streamingRecognize({config: {encoding: 'FLAC', sampleRateHertz: 48000, languageCode: config.languageCode}})
               .on('error', logger.error)
               .on('data', response => {
                   if(response.results.length) {

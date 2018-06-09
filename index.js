@@ -8,11 +8,30 @@ const flac = require('node-flac');
 const Discord = require('discord.js');
 const client = new Discord.Client();
 
+const speech = require('@google-cloud/speech');
+const sclient = new speech.SpeechClient();
+
 // make a new stream for each time someone starts to talk
 function generateOutputFile(channel, member) {
   // use IDs instead of username cause some people have stupid emojis in their name
   const fileName = `./record-flac/${channel.id}-${member.id}-${Date.now()}.flac`;
-  return fs.createWriteStream(fileName);
+  return [fileName, fs.createWriteStream(fileName)];
+}
+
+function createRequest(filename) {
+  const file = fs.readFileSync(filename);
+  const audioBytes = file.toString('base64');
+
+  // The audio file's encoding, sample rate in hertz, and BCP-47 language code
+  return {
+    audio: {
+      content: audioBytes,
+    },
+    config: {
+      encoding: 'FLAC',
+      languageCode: 'ja-JP',
+    },
+  };
 }
 
 class MonoStream extends stream.Transform {
@@ -41,11 +60,11 @@ client.on('message', msg => {
 
         conn.on('speaking', (user, speaking) => {
           if (speaking) {
-            msg.channel.send(`I'm listening to ${user}`);
+            // msg.channel.send(`I'm listening to ${user}`);
             // this creates a 16-bit signed PCM, stereo 48KHz PCM stream.
             const audioStream = receiver.createPCMStream(user);
             // create an output stream so we can dump our data in a file
-            const outputStream = generateOutputFile(voiceChannel, user);
+            const [filename, outputStream] = generateOutputFile(voiceChannel, user);
 
             const encoderStream = new flac.FlacEncoder({
               channels: 1,
@@ -60,8 +79,24 @@ client.on('message', msg => {
             monoStream.pipe(encoderStream);
             encoderStream.pipe(outputStream);
             // when the stream ends (the user stopped talking) tell the user
-            audioStream.on('end', () => {
-              msg.channel.send(`I'm no longer listening to ${user}`);
+            // audioStream.on('end', () => {
+            //   msg.channel.send(`I'm no longer listening to ${user}`);
+            // });
+            outputStream.on('close', () => {
+              sclient
+                .recognize(createRequest(filename))
+                .then(data => {
+                  const response = data[0];
+                  if(response.results.length) {
+                    const transcription = response.results
+                      .map(result => result.alternatives[0].transcript)
+                      .join('\n');
+                    msg.channel.send(`${user}: ${transcription}`);
+                  }
+                })
+                .catch(err => {
+                  console.error('ERROR:', err);
+                });
             });
           }
         });

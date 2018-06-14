@@ -73,9 +73,7 @@ client.on('message', msg => {
               })
 
             // pipe our audio data into the file stream
-            audioStream.pipe(monoStream)
-            monoStream.pipe(encoderStream)
-            encoderStream.pipe(recognizeStream)
+            audioStream.pipe(monoStream).pipe(encoderStream).pipe(recognizeStream)
             // when the stream ends (the user stopped talking) tell the user
             // audioStream.on('end', () => {
             //   msg.channel.send(`I'm no longer listening to ${user}`);

@@ -28,9 +28,11 @@ node index.js
 
 ## Usage
 
-- <prefix>join <voice channel name>
+- \<prefix\>join \<voice channel name\>
+
 join the specified channel and start voice recognition
 
-- <prefix>leave <voice channel name>
+- \<prefix\>leave \<voice channel name\>
+
 leave the specified channel and stop voice recognition
 

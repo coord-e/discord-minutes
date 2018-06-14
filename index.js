@@ -67,7 +67,7 @@ client.on('message', msg => {
                   const transcription = response.results
                     .map(result => result.alternatives[0].transcript)
                     .join('\n')
-                  msg.channel.send(`${user}: ${transcription}`)
+                  msg.channel.send(`${user.username}: ${transcription}`)
                   logger.info(`${user.username}: ${transcription}`)
                 }
               })

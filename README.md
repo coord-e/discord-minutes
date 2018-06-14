@@ -25,3 +25,12 @@ export GOOGLE_APPLICATION_CREDENTIALS='<path to your credential json>'
 ```bash
 node index.js
 ```
+
+## Usage
+
+- <prefix>join <voice channel name>
+join the specified channel and start voice recognition
+
+- <prefix>leave <voice channel name>
+leave the specified channel and stop voice recognition
+
